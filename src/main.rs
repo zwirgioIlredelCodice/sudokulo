@@ -250,13 +250,14 @@ struct Bestcell {
     nums: Vec<i32>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum State {
     Complete,
     Incomplete,
     Error,
 }
 
+#[derive(Clone)]
 struct SudokuStatus {
     sudoku: [i32; 81],
     status: State,
@@ -306,28 +307,28 @@ fn best_cell(sudoku: [i32; 81]) -> Bestcell {
 }
 
 fn solvesudoku(mut s_sudoku: SudokuStatus) -> SudokuStatus {
-    loop {
-        match s_sudoku.status {
-            State::Complete => return s_sudoku,
-            State::Incomplete => {
-                let bcell: Bestcell;
-                bcell = best_cell(s_sudoku.sudoku);
+    match s_sudoku.status {
+        State::Complete => return s_sudoku,
+        State::Incomplete => {
+            let bcell: Bestcell;
+            bcell = best_cell(s_sudoku.sudoku);
 
-                if bcell.nums.len() == 1 {
-                    s_sudoku.sudoku[bcell.cell as usize] = bcell.nums[0];
-                } else {
-                    // see if completed
-                    s_sudoku.status = State::Complete;
-                    for i in s_sudoku.sudoku {
-                        if i == 0 {
-                            s_sudoku.status = State::Error;
-                        }
+            if bcell.nums.len() == 1 {
+                s_sudoku.sudoku[bcell.cell as usize] = bcell.nums[0];
+            } else {
+                // see if completed
+                s_sudoku.status = State::Complete;
+                for i in s_sudoku.sudoku {
+                    if i == 0 {
+                        s_sudoku.status = State::Error;
                     }
                 }
             }
-            State::Error => return s_sudoku,
+            s_sudoku = solvesudoku(s_sudoku);
         }
+        State::Error => return s_sudoku,
     }
+    s_sudoku
 }
 
 fn prinsudoku(s_sudoku: SudokuStatus) {
@@ -344,17 +345,23 @@ fn prinsudoku(s_sudoku: SudokuStatus) {
 fn main() {
     println!("Hello, world!");
 
-    let sudoku: SudokuStatus = SudokuStatus { sudoku: [
-        9, 8, 5, 4, 0, 1, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 1, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        5, 0, 0, 0, 0, 0, 4, 0, 2, 0, 0, 9, 0, 0, 3, 0, 9, 0, 0, 6, 3, 4, 0, 0, 0, 6, 0, 0, 1, 0,
-        0, 0, 0, 0, 0, 0, 3, 0, 6, 0, 0, 5, 2, 0, 0, 0, 8, 0, 0, 0, 1,
-    ], status: State::Incomplete } ;
+    let sudoku: SudokuStatus = SudokuStatus {
+        sudoku: [
+            9, 8, 5, 4, 0, 1, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 1, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 5, 0, 0, 0, 0, 0, 4, 0, 2, 0, 0, 9, 0, 0, 3, 0, 9, 0, 0, 6, 3, 4, 0, 0, 0, 6, 0, 0,
+            1, 0, 0, 0, 0, 0, 0, 0, 3, 0, 6, 0, 0, 5, 2, 0, 0, 0, 8, 0, 0, 0, 1,
+        ],
+        status: State::Incomplete,
+    };
 
-    let hsudoku: SudokuStatus = SudokuStatus { sudoku: [
-        0, 0, 6, 3, 0, 7, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 5, 1, 0, 0, 0, 0, 6, 0, 8, 2, 2, 0, 5,
-        0, 5, 0, 1, 0, 6, 0, 0, 0, 2, 0, 0, 3, 0, 0, 9, 0, 0, 0, 7, 0, 0, 0, 4, 0, 5, 0, 0, 0, 0,
-        0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 1, 0, 9, 0, 4, 0,
-    ], status: State::Incomplete };
+    let hsudoku: SudokuStatus = SudokuStatus {
+        sudoku: [
+            0, 0, 6, 3, 0, 7, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 5, 1, 0, 0, 0, 0, 6, 0, 8, 2, 2, 0,
+            5, 0, 5, 0, 1, 0, 6, 0, 0, 0, 2, 0, 0, 3, 0, 0, 9, 0, 0, 0, 7, 0, 0, 0, 4, 0, 5, 0, 0,
+            0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 1, 0, 9, 0, 4, 0,
+        ],
+        status: State::Incomplete,
+    };
 
     prinsudoku(solvesudoku(sudoku));
 }
