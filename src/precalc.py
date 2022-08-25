@@ -51,7 +51,4 @@ for i in sudoku:
     all.append(l)
     
 # generate rust code
-print("let precalc = " + str(all))
-
-    
-    
+print("let precalc = " + str(all))  
