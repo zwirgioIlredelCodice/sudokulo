@@ -15,24 +15,24 @@ fn getlegalnuber(sudoku: [[u8; 9]; 9], cell: Cell) -> Vec<u8> {
 
     // row
     let row = sudoku[cell.y as usize];
-    for i in row {
-        if i != 0 {
-            arr[(i - 1) as usize] = 0;
+    for x in row {
+        if x != 0 {
+            arr[(x - 1) as usize] = 0;
         }
     }
 
     // collums
-    for i in sudoku {
-        if i[cell.x as usize] != 0 {
-            arr[(i[cell.x as usize] - 1) as usize] = 0;
+    for y in sudoku {
+        if y[cell.x as usize] != 0 {
+            arr[(y[cell.x as usize] - 1) as usize] = 0;
         }
     }
 
     //box
-    let cellstart = (cell.x - cell.x % 3, cell.x - cell.x % 3);
-    for i in cellstart.0..(cellstart.0 + 3) {
-        for ii in cellstart.1..(cellstart.1 + 3) {
-            let num = sudoku[i as usize][ii as usize];
+    let cellstart = (cell.x - cell.x % 3, cell.y - cell.y % 3);
+    for i in cellstart.1..(cellstart.1 + 3) {
+        for ii in cellstart.0..(cellstart.0 + 3) {
+            let num = sudoku[ii as usize][i as usize];
             if num != 0 {
                 arr[(num - 1) as usize] = 0;
             }
@@ -46,6 +46,7 @@ fn getlegalnuber(sudoku: [[u8; 9]; 9], cell: Cell) -> Vec<u8> {
             v.push(i);
         }
     }
+
     v
 }
 
@@ -60,14 +61,14 @@ fn decidecell(sudoku: [[u8; 9]; 9]) -> BestCell {
 
     for i in 0..9 {
         for ii in 0..9 {
-            if sudoku[i as usize][ii as usize] == 0 {
-                v = getlegalnuber(sudoku, Cell { x: i, y: ii });
+            if sudoku[ii as usize][i as usize] == 0 {
+                v = getlegalnuber(sudoku, Cell { x: ii, y: i });
                 let len = v.len();
 
                 if len < minposs {
                     minposs = len;
-                    bestcell.cell.x = i;
-                    bestcell.cell.y = ii;
+                    bestcell.cell.x = ii;
+                    bestcell.cell.y = i;
                     bestcell.legalnums = v;
                 }
 
@@ -83,12 +84,12 @@ fn decidecell(sudoku: [[u8; 9]; 9]) -> BestCell {
 fn solvesudoku(mut sudoku: [[u8; 9]; 9]) -> [[u8; 9]; 9] {
     let mut bestcell: BestCell;
 
-    for i in 0..10 {
+    for _ in 0..10 {
         bestcell = decidecell(sudoku);
 
         if bestcell.legalnums.len() == 1 {
             println!("decidec cell: {:?}", bestcell);
-            sudoku[bestcell.cell.y as usize][bestcell.cell.x as usize] = bestcell.legalnums[0];
+            sudoku[bestcell.cell.x as usize][bestcell.cell.y as usize] = bestcell.legalnums[0];
         } else {
             if bestcell.legalnums.len() == 0 {
                 println!("finito");
