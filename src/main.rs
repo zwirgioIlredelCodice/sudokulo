@@ -250,14 +250,14 @@ struct Bestcell {
     nums: Vec<i32>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 enum State {
     Complete,
     Incomplete,
     Error,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 struct SudokuStatus {
     sudoku: [i32; 81],
     status: State,
@@ -315,6 +315,34 @@ fn solvesudoku(mut s_sudoku: SudokuStatus) -> SudokuStatus {
 
             if bcell.nums.len() == 1 {
                 s_sudoku.sudoku[bcell.cell as usize] = bcell.nums[0];
+            }
+            else if bcell.nums.len() > 1 {
+                let mut t_s_sudoku: SudokuStatus = s_sudoku.clone();
+                for (i, option) in bcell.nums.iter().enumerate() {
+                    t_s_sudoku.sudoku[bcell.cell as usize] = option.clone();
+                    t_s_sudoku = solvesudoku(t_s_sudoku);
+
+                    match t_s_sudoku.status {
+                        State::Complete => {
+                            s_sudoku = t_s_sudoku;
+                            break;
+                        },
+                        State::Incomplete => {
+                            if i + 1 == bcell.nums.len() {
+                                s_sudoku.status = State::Error;
+                            } else {
+                                t_s_sudoku = s_sudoku.clone()
+                            }
+                        },
+                        State::Error => {
+                            if i + 1 == bcell.nums.len() {
+                                s_sudoku.status = State::Error;
+                            } else {
+                                t_s_sudoku = s_sudoku.clone()
+                            }
+                        },
+                    }
+                }
             } else {
                 // see if completed
                 s_sudoku.status = State::Complete;
@@ -356,12 +384,18 @@ fn main() {
 
     let hsudoku: SudokuStatus = SudokuStatus {
         sudoku: [
-            0, 0, 6, 3, 0, 7, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 5, 1, 0, 0, 0, 0, 6, 0, 8, 2, 2, 0,
-            5, 0, 5, 0, 1, 0, 6, 0, 0, 0, 2, 0, 0, 3, 0, 0, 9, 0, 0, 0, 7, 0, 0, 0, 4, 0, 5, 0, 0,
-            0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 1, 0, 9, 0, 4, 0,
+            0, 0, 6, 3, 0, 7, 0, 0, 0,
+            0, 0, 4, 0, 0, 0, 0, 0, 5,
+            1, 0, 0, 0, 0, 6, 0, 8, 2,
+            2, 0, 5, 0, 3, 0, 1, 0, 6,
+            0, 0, 0, 2, 0, 0, 3, 0, 0,
+            9, 0, 0, 0, 7, 0, 0, 0, 4,
+            0, 5, 0, 0, 0, 0, 0, 0, 0,
+            0, 1, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 8, 1, 0, 9, 0, 4, 0,
         ],
         status: State::Incomplete,
     };
 
-    prinsudoku(solvesudoku(sudoku));
+    prinsudoku(solvesudoku(hsudoku));
 }
