@@ -1,3 +1,5 @@
+use std::env;
+
 const PRECALC: [[i32; 21]; 81] = [
     [
         0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 18, 27, 36, 45, 54, 63, 72, 10, 19, 11, 20,
@@ -368,29 +370,9 @@ fn prinsudoku(s_sudoku: SudokuStatus) {
             print!(" ");
         }
     }
-    println!("status: {:?}", s_sudoku.status)
+    println!("status: {:?}", &s_sudoku.status)
 }
 fn main() {
-    println!("Hello, world!");
-
-    let _sudoku: SudokuStatus = SudokuStatus {
-        sudoku: [
-            9, 8, 5, 4, 0, 1, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 1, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 5, 0, 0, 0, 0, 0, 4, 0, 2, 0, 0, 9, 0, 0, 3, 0, 9, 0, 0, 6, 3, 4, 0, 0, 0, 6, 0, 0,
-            1, 0, 0, 0, 0, 0, 0, 0, 3, 0, 6, 0, 0, 5, 2, 0, 0, 0, 8, 0, 0, 0, 1,
-        ],
-        status: State::Incomplete,
-    };
-
-    let _msudoku: SudokuStatus = SudokuStatus {
-        sudoku: [
-            0, 0, 6, 3, 0, 7, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 5, 1, 0, 0, 0, 0, 6, 0, 8, 2, 2, 0,
-            5, 0, 3, 0, 1, 0, 6, 0, 0, 0, 2, 0, 0, 3, 0, 0, 9, 0, 0, 0, 7, 0, 0, 0, 4, 0, 5, 0, 0,
-            0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 1, 0, 9, 0, 4, 0,
-        ],
-        status: State::Incomplete,
-    };
-
     /*
     sudoku: [
             0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -404,15 +386,82 @@ fn main() {
             0, 0, 0, 0, 0, 0, 0, 0, 0,
         ],
     */
+    // 006307000004000005100006082205030106000200300900070004050000000010000000008109040
 
-    let hsudoku: SudokuStatus = SudokuStatus {
-        sudoku: [
-            8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 0, 0, 0, 0, 0, 0, 7, 0, 0, 9, 0, 2, 0, 0, 0, 5,
-            0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 4, 5, 7, 0, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 1, 0,
-            0, 0, 0, 6, 8, 0, 0, 8, 5, 0, 0, 0, 1, 0, 0, 9, 0, 0, 0, 0, 4, 0, 0,
-        ],
-        status: State::Incomplete,
-    };
+    let args: Vec<String> = env::args().collect();
+    let ssudoku = &args[1];
+    if ssudoku.len() == 81 {
+        let mut sudoku: SudokuStatus = SudokuStatus {
+            sudoku: [
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            ],
+            status: State::Incomplete,
+        };
+        for (index, numchar) in ssudoku.chars().enumerate() {
+            sudoku.sudoku[index] = numchar as i32;
+        }
+        
+        prinsudoku(solvesudoku(sudoku));
+    } else {
+        println!("error in sudoku input format")
+    }
+}
 
-    prinsudoku(solvesudoku(hsudoku));
+#[cfg(test)]
+mod tests {
+    use crate::*;
+
+    #[test]
+    fn solveeasy() {
+        let mut sudoku: SudokuStatus = SudokuStatus {
+            sudoku: [
+                9, 8, 5, 4, 0, 1, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 1, 0, 6, 0, 0, 0, 0, 0, 0, 0,
+                0, 0, 5, 0, 0, 0, 0, 0, 4, 0, 2, 0, 0, 9, 0, 0, 3, 0, 9, 0, 0, 6, 3, 4, 0, 0, 0, 6,
+                0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 3, 0, 6, 0, 0, 5, 2, 0, 0, 0, 8, 0, 0, 0, 1,
+            ],
+            status: State::Incomplete,
+        };
+        sudoku = solvesudoku(sudoku);
+        match sudoku.status {
+            State::Complete => assert!(true),
+            _ => assert!(false),
+        }
+        prinsudoku(sudoku);
+    }
+    #[test]
+    fn solvemedium() {
+        let mut sudoku: SudokuStatus = SudokuStatus {
+            sudoku: [
+                0, 0, 6, 3, 0, 7, 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 5, 1, 0, 0, 0, 0, 6, 0, 8, 2, 2,
+                0, 5, 0, 3, 0, 1, 0, 6, 0, 0, 0, 2, 0, 0, 3, 0, 0, 9, 0, 0, 0, 7, 0, 0, 0, 4, 0, 5,
+                0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 1, 0, 9, 0, 4, 0,
+            ],
+            status: State::Incomplete,
+        };
+        sudoku = solvesudoku(sudoku);
+        match sudoku.status {
+            State::Complete => assert!(true),
+            _ => assert!(false),
+        }
+        prinsudoku(sudoku);
+    }
+    #[test]
+    fn solvehard() {
+        let mut sudoku: SudokuStatus = SudokuStatus {
+            sudoku: [
+                8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 0, 0, 0, 0, 0, 0, 7, 0, 0, 9, 0, 2, 0, 0, 0,
+                5, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 4, 5, 7, 0, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0,
+                1, 0, 0, 0, 0, 6, 8, 0, 0, 8, 5, 0, 0, 0, 1, 0, 0, 9, 0, 0, 0, 0, 4, 0, 0,
+            ],
+            status: State::Incomplete,
+        };
+        sudoku = solvesudoku(sudoku);
+        match sudoku.status {
+            State::Complete => assert!(true),
+            _ => assert!(false),
+        }
+        prinsudoku(sudoku);
+    }
 }
