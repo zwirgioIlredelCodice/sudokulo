@@ -246,7 +246,6 @@ const PRECALC: [[i32; 21]; 81] = [
     ],
 ];
 
-#[derive(Debug)]
 struct Bestcell {
     cell: i32,
     nums: Vec<i32>,
@@ -388,7 +387,16 @@ fn main() {
     */
     // 006307000004000005100006082205030106000200300900070004050000000010000000008109040
 
+    let helpmsg = r#"Usage: sudokulo [SUDOKUSTRING]
+Solve a 9x9 sudoku.
+
+The SUDOKUSTRING is the sequence of number in the sudoku, left to right and top to bottom without any spac e or any newline with empty cells replaced by number 0.
+es: 'sudokulo 006307000004000005100006082205030106000200300900070004050000000010000000008109040'"#;
+
     let args: Vec<String> = env::args().collect();
+    if args.len()  != 2 {
+        panic!("one argument required\ntype 'sudokulo --help' for help");
+    }
     let ssudoku = &args[1];
     if ssudoku.len() == 81 {
         let mut sudoku: SudokuStatus = SudokuStatus {
@@ -400,12 +408,15 @@ fn main() {
             status: State::Incomplete,
         };
         for (index, numchar) in ssudoku.chars().enumerate() {
-            sudoku.sudoku[index] = numchar as i32;
+            sudoku.sudoku[index] = numchar.to_digit(10).expect("only number are allowed") as i32;
         }
         
         prinsudoku(solvesudoku(sudoku));
+    }
+    else if ssudoku == "-h" || ssudoku == "--help" {
+        println!("{}", helpmsg);
     } else {
-        println!("error in sudoku input format")
+        println!("error in sudoku input format\ntype 'sudokulo --help' for help")
     }
 }
 

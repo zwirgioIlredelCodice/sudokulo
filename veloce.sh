@@ -1,1 +1,0 @@
-/usr/bin/time -v ./target/release/sudokulo
